@@ -2,32 +2,82 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Flappy Bird</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #111;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      touch-action: manipulation;
+      overflow: hidden;
+    }
+
+    .game-box {
+      text-align: center;
+      width: 100%;
+      max-width: 430px;
+    }
+
+    canvas {
+      width: 95vw;
+      max-width: 400px;
+      height: auto;
+      border: 2px solid #222;
+      border-radius: 12px;
+      background: #87CEEB;
+      touch-action: none;
+    }
+
+    #restartBtn {
+      display: none;
+      margin-top: 12px;
+      padding: 14px 28px;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      background: #ffcc00;
+      cursor: pointer;
+    }
+
+    #restartBtn:active {
+      transform: scale(0.96);
+    }
+  </style>
 </head>
-<body style="margin:0; background:#111; display:flex; justify-content:center; align-items:center; min-height:100vh;">
 
-  <div>
-    <h2 style="text-align:center; font-family:Arial; color:white;">Flappy Bird</h2>
-    <p style="text-align:center; font-family:Arial; color:white;">
-      Steuerung: <b>Leertaste</b> oder <b>Mausklick</b><br>
-      Drücke <b>R</b> für Neustart
-    </p>
+<body>
 
-    <canvas id="gameCanvas" width="400" height="600"
-      style="border:2px solid #222; border-radius:12px; background:#87CEEB;">
-    </canvas>
-  </div>
+<div class="game-box">
+  <h2>Flappy Bird</h2>
+  <p>
+    Leertaste, Mausklick oder Bildschirm berühren<br>
+    Nach Game Over: Neustart Button
+  </p>
+
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+
+  <br>
+  <button id="restartBtn">Neu starten</button>
+</div>
 
 <script>
 (function() {
   const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
+  const restartBtn = document.getElementById("restartBtn");
 
   const W = canvas.width;
   const H = canvas.height;
 
   let bird, pipes, frame, score, gameOver, started;
-
   let bestScore = Number(localStorage.getItem("flappyBestScore")) || 0;
 
   const gravity = 0.45;
@@ -35,13 +85,6 @@
   const pipeWidth = 70;
   const pipeGap = 170;
   const pipeSpeed = 2.5;
-
-  function saveBestScore() {
-    if (score > bestScore) {
-      bestScore = score;
-      localStorage.setItem("flappyBestScore", bestScore);
-    }
-  }
 
   function resetGame() {
     bird = {
@@ -56,12 +99,27 @@
     score = 0;
     gameOver = false;
     started = false;
+    restartBtn.style.display = "none";
   }
 
-  resetGame();
+  function saveBestScore() {
+    if (score > bestScore) {
+      bestScore = score;
+      localStorage.setItem("flappyBestScore", bestScore);
+    }
+  }
+
+  function endGame() {
+    if (!gameOver) {
+      gameOver = true;
+      saveBestScore();
+      restartBtn.style.display = "inline-block";
+    }
+  }
 
   function addPipe() {
     const topHeight = Math.floor(Math.random() * 220) + 60;
+
     pipes.push({
       x: W,
       top: topHeight,
@@ -74,6 +132,24 @@
     if (gameOver) return;
     started = true;
     bird.velocity = jump;
+  }
+
+  function drawBackground() {
+    ctx.fillStyle = "#87CEEB";
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    drawCloud(70, 90);
+    drawCloud(260, 130);
+    drawCloud(170, 60);
+  }
+
+  function drawCloud(x, y) {
+    ctx.beginPath();
+    ctx.arc(x, y, 18, 0, Math.PI * 2);
+    ctx.arc(x + 20, y - 10, 22, 0, Math.PI * 2);
+    ctx.arc(x + 45, y, 18, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   function drawBird() {
@@ -131,24 +207,6 @@
     ctx.fillRect(0, H - 45, W, 8);
   }
 
-  function drawCloud(x, y) {
-    ctx.beginPath();
-    ctx.arc(x, y, 18, 0, Math.PI * 2);
-    ctx.arc(x + 20, y - 10, 22, 0, Math.PI * 2);
-    ctx.arc(x + 45, y, 18, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  function drawBackground() {
-    ctx.fillStyle = "#87CEEB";
-    ctx.fillRect(0, 0, W, H);
-
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
-    drawCloud(70, 90);
-    drawCloud(260, 130);
-    drawCloud(170, 60);
-  }
-
   function drawScore() {
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
@@ -163,22 +221,22 @@
   function drawStartMessage() {
     if (!started && !gameOver) {
       ctx.fillStyle = "rgba(0,0,0,0.5)";
-      ctx.fillRect(50, 220, 300, 110);
+      ctx.fillRect(45, 220, 310, 110);
 
       ctx.fillStyle = "white";
       ctx.font = "bold 28px Arial";
       ctx.textAlign = "center";
       ctx.fillText("Flappy Bird", W / 2, 260);
 
-      ctx.font = "18px Arial";
-      ctx.fillText("Klick oder Leertaste zum Start", W / 2, 295);
+      ctx.font = "17px Arial";
+      ctx.fillText("Tippe auf den Bildschirm", W / 2, 295);
     }
   }
 
   function drawGameOver() {
     if (gameOver) {
-      ctx.fillStyle = "rgba(0,0,0,0.6)";
-      ctx.fillRect(55, 200, 290, 160);
+      ctx.fillStyle = "rgba(0,0,0,0.65)";
+      ctx.fillRect(55, 200, 290, 150);
 
       ctx.fillStyle = "white";
       ctx.font = "bold 32px Arial";
@@ -188,15 +246,7 @@
       ctx.font = "22px Arial";
       ctx.fillText("Score: " + score, W / 2, 285);
       ctx.fillText("Best: " + bestScore, W / 2, 315);
-
-      ctx.font = "18px Arial";
-      ctx.fillText("Drücke R für Neustart", W / 2, 345);
     }
-  }
-
-  function endGame() {
-    gameOver = true;
-    saveBestScore();
   }
 
   function update() {
@@ -263,8 +313,26 @@
     }
   });
 
-  canvas.addEventListener("mousedown", flap);
+  canvas.addEventListener("mousedown", function(e) {
+    e.preventDefault();
+    flap();
+  });
 
+  canvas.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    flap();
+  }, { passive: false });
+
+  restartBtn.addEventListener("click", function() {
+    resetGame();
+  });
+
+  restartBtn.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    resetGame();
+  }, { passive: false });
+
+  resetGame();
   loop();
 })();
 </script>
