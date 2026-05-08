@@ -20,6 +20,7 @@
   const H = canvas.height;
 
   let bird, pipes, frame, score, bestScore, gameOver, started;
+  bestScore = Number(localStorage.getItem("flappyBestScore")) || 0;
 
   const gravity = 0.45;
   const jump = -7.5;
@@ -152,6 +153,9 @@
 
     ctx.font = "18px Arial";
     ctx.fillText("Best: " + bestScore, W / 2, 90);
+    ctx.fillStyle = "white";
+ctx.font = "20px Arial";
+ctx.fillText("Best: " + bestScore, W / 2 - 35, 90);
   }
 
   function drawStartMessage() {
@@ -215,6 +219,10 @@
 
         if (hitsPipeX && (hitsTop || hitsBottom)) {
           gameOver = true;
+          if (score > bestScore) {
+  bestScore = score;
+  localStorage.setItem("flappyBestScore", bestScore);
+}
         }
       });
 
