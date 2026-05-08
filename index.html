@@ -1,31 +1,47 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Flappy Bird</title>
+</head>
+<body style="margin:0; background:#111; display:flex; justify-content:center; align-items:center; min-height:100vh;">
+
   <div>
-    <h2 style="text-align:center; font-family:Arial;">Flappy Bird</h2>
-    <p style="text-align:center; font-family:Arial;">
+    <h2 style="text-align:center; font-family:Arial; color:white;">Flappy Bird</h2>
+    <p style="text-align:center; font-family:Arial; color:white;">
       Steuerung: <b>Leertaste</b> oder <b>Mausklick</b><br>
       Drücke <b>R</b> für Neustart
     </p>
+
     <canvas id="gameCanvas" width="400" height="600"
-            style="border:2px solid #222; border-radius:12px; background:#87CEEB;"></canvas>
+      style="border:2px solid #222; border-radius:12px; background:#87CEEB;">
+    </canvas>
   </div>
-</div>
 
 <script>
 (function() {
-  const oldCanvas = document.getElementById("gameCanvas");
-  const canvas = oldCanvas;
+  const canvas = document.getElementById("gameCanvas");
   const ctx = canvas.getContext("2d");
 
   const W = canvas.width;
   const H = canvas.height;
 
-  let bird, pipes, frame, score, bestScore, gameOver, started;
-  bestScore = Number(localStorage.getItem("flappyBestScore")) || 0;
+  let bird, pipes, frame, score, gameOver, started;
+
+  let bestScore = Number(localStorage.getItem("flappyBestScore")) || 0;
 
   const gravity = 0.45;
   const jump = -7.5;
   const pipeWidth = 70;
   const pipeGap = 170;
   const pipeSpeed = 2.5;
+
+  function saveBestScore() {
+    if (score > bestScore) {
+      bestScore = score;
+      localStorage.setItem("flappyBestScore", bestScore);
+    }
+  }
 
   function resetGame() {
     bird = {
@@ -42,7 +58,6 @@
     started = false;
   }
 
-  bestScore = 0;
   resetGame();
 
   function addPipe() {
@@ -65,13 +80,11 @@
     ctx.save();
     ctx.translate(bird.x, bird.y);
 
-    // Körper
     ctx.fillStyle = "yellow";
     ctx.beginPath();
     ctx.arc(0, 0, bird.radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Auge
     ctx.fillStyle = "white";
     ctx.beginPath();
     ctx.arc(5, -5, 5, 0, Math.PI * 2);
@@ -82,7 +95,6 @@
     ctx.arc(7, -5, 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // Schnabel
     ctx.fillStyle = "orange";
     ctx.beginPath();
     ctx.moveTo(14, 0);
@@ -91,7 +103,6 @@
     ctx.closePath();
     ctx.fill();
 
-    // Flügel
     ctx.fillStyle = "#f4c542";
     ctx.beginPath();
     ctx.ellipse(-4, 4, 8, 5, -0.4, 0, Math.PI * 2);
@@ -102,14 +113,10 @@
 
   function drawPipes() {
     pipes.forEach(pipe => {
-      // Oberes Rohr
       ctx.fillStyle = "#2E8B57";
       ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
-
-      // Unteres Rohr
       ctx.fillRect(pipe.x, H - pipe.bottom, pipeWidth, pipe.bottom);
 
-      // Rohrkappen
       ctx.fillStyle = "#3CB371";
       ctx.fillRect(pipe.x - 4, pipe.top - 20, pipeWidth + 8, 20);
       ctx.fillRect(pipe.x - 4, H - pipe.bottom, pipeWidth + 8, 20);
@@ -124,18 +131,6 @@
     ctx.fillRect(0, H - 45, W, 8);
   }
 
-  function drawBackground() {
-    // Himmel
-    ctx.fillStyle = "#87CEEB";
-    ctx.fillRect(0, 0, W, H);
-
-    // Wolken
-    ctx.fillStyle = "rgba(255,255,255,0.9)";
-    drawCloud(70, 90);
-    drawCloud(260, 130);
-    drawCloud(170, 60);
-  }
-
   function drawCloud(x, y) {
     ctx.beginPath();
     ctx.arc(x, y, 18, 0, Math.PI * 2);
@@ -144,17 +139,25 @@
     ctx.fill();
   }
 
+  function drawBackground() {
+    ctx.fillStyle = "#87CEEB";
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = "rgba(255,255,255,0.9)";
+    drawCloud(70, 90);
+    drawCloud(260, 130);
+    drawCloud(170, 60);
+  }
+
   function drawScore() {
     ctx.fillStyle = "white";
-    ctx.font = "bold 36px Arial";
     ctx.textAlign = "center";
+
+    ctx.font = "bold 36px Arial";
     ctx.fillText(score, W / 2, 60);
 
-    ctx.font = "18px Arial";
+    ctx.font = "20px Arial";
     ctx.fillText("Best: " + bestScore, W / 2, 90);
-    ctx.fillStyle = "white";
-ctx.font = "20px Arial";
-ctx.fillText("Best: " + bestScore, W / 2 - 35, 90);
   }
 
   function drawStartMessage() {
@@ -175,7 +178,7 @@ ctx.fillText("Best: " + bestScore, W / 2 - 35, 90);
   function drawGameOver() {
     if (gameOver) {
       ctx.fillStyle = "rgba(0,0,0,0.6)";
-      ctx.fillRect(55, 200, 290, 150);
+      ctx.fillRect(55, 200, 290, 160);
 
       ctx.fillStyle = "white";
       ctx.font = "bold 32px Arial";
@@ -187,8 +190,13 @@ ctx.fillText("Best: " + bestScore, W / 2 - 35, 90);
       ctx.fillText("Best: " + bestScore, W / 2, 315);
 
       ctx.font = "18px Arial";
-      ctx.fillText("Drücke R für Neustart", W / 2, 340);
+      ctx.fillText("Drücke R für Neustart", W / 2, 345);
     }
+  }
+
+  function endGame() {
+    gameOver = true;
+    saveBestScore();
   }
 
   function update() {
@@ -208,28 +216,22 @@ ctx.fillText("Best: " + bestScore, W / 2 - 35, 90);
         if (!pipe.passed && pipe.x + pipeWidth < bird.x) {
           pipe.passed = true;
           score++;
-          if (score > bestScore) bestScore = score;
+          saveBestScore();
         }
 
-        // Kollision Rohre
         const hitsPipeX = bird.x + bird.radius > pipe.x && bird.x - bird.radius < pipe.x + pipeWidth;
         const hitsTop = bird.y - bird.radius < pipe.top;
         const hitsBottom = bird.y + bird.radius > H - pipe.bottom;
 
         if (hitsPipeX && (hitsTop || hitsBottom)) {
-          gameOver = true;
-          if (score > bestScore) {
-  bestScore = score;
-  localStorage.setItem("flappyBestScore", bestScore);
-}
+          endGame();
         }
       });
 
       pipes = pipes.filter(pipe => pipe.x + pipeWidth > -10);
 
-      // Boden / Decke
       if (bird.y + bird.radius > H - 45 || bird.y - bird.radius < 0) {
-        gameOver = true;
+        endGame();
       }
     }
   }
@@ -253,20 +255,19 @@ ctx.fillText("Best: " + bestScore, W / 2 - 35, 90);
   document.addEventListener("keydown", function(e) {
     if (e.code === "Space") {
       e.preventDefault();
-      if (gameOver) return;
       flap();
     }
+
     if (e.key === "r" || e.key === "R") {
       resetGame();
     }
   });
 
-  canvas.addEventListener("mousedown", function() {
-    if (gameOver) return;
-    flap();
-  });
+  canvas.addEventListener("mousedown", flap);
 
   loop();
 })();
 </script>
-""")
+
+</body>
+</html>
