@@ -155,7 +155,6 @@ function draw() {
   ctx.fillStyle = "#87CEEB";
   ctx.fillRect(0, 0, W, H);
 
-  // Wolken
   ctx.fillStyle = "white";
   ctx.beginPath();
   ctx.arc(80, 100, 20, 0, Math.PI * 2);
@@ -163,24 +162,21 @@ function draw() {
   ctx.arc(135, 100, 20, 0, Math.PI * 2);
   ctx.fill();
 
-  // Rohre
   for (let pipe of pipes) {
     ctx.fillStyle = "green";
     ctx.fillRect(pipe.x, 0, pipe.w, pipe.top);
     ctx.fillRect(pipe.x, pipe.top + pipe.gap, pipe.w, H);
   }
 
-  // Boden
   ctx.fillStyle = "#DEB887";
   ctx.fillRect(0, H - 45, W, 45);
 
-  // Vogel
-  ctx.fillStyle = "yellow";
+  /* Roter Vogel */
+  ctx.fillStyle = "red";
   ctx.beginPath();
   ctx.arc(bird.x, bird.y, bird.r, 0, Math.PI * 2);
   ctx.fill();
 
-  // Auge
   ctx.fillStyle = "white";
   ctx.beginPath();
   ctx.arc(bird.x + 5, bird.y - 5, 5, 0, Math.PI * 2);
@@ -191,7 +187,6 @@ function draw() {
   ctx.arc(bird.x + 7, bird.y - 5, 2, 0, Math.PI * 2);
   ctx.fill();
 
-  // Schnabel
   ctx.fillStyle = "orange";
   ctx.beginPath();
   ctx.moveTo(bird.x + 14, bird.y);
@@ -199,7 +194,6 @@ function draw() {
   ctx.lineTo(bird.x + 14, bird.y + 10);
   ctx.fill();
 
-  // Score
   ctx.fillStyle = "white";
   ctx.font = "bold 36px Arial";
   ctx.textAlign = "center";
@@ -237,25 +231,21 @@ function loop() {
   requestAnimationFrame(loop);
 }
 
-// PC Steuerung
 document.addEventListener("keydown", function(e) {
   if (e.code === "Space") {
     jump();
   }
 });
 
-// Maus
 canvas.onclick = function() {
   jump();
 };
 
-// Handy Touch
 canvas.ontouchstart = function(e) {
   e.preventDefault();
   jump();
 };
 
-// Restart Button
 restartBtn.onclick = function() {
   resetGame();
 };
